@@ -1,6 +1,11 @@
+import { vValidator } from '@hono/valibot-validator'
 import { Hono } from 'hono'
+import { ERROR_MESSAGES } from '../constants'
 import { analyzePost } from '../services/analyzePost'
+import { AppError } from '../services/errors'
 import type { Env } from '../types/env'
+import { createErrorResponse, createSuccessResponse } from '../types/responses'
+import { analysisRequestSchema } from '../validators/validation-schemas'
 
 /**
  * 投稿分析用のルーター
@@ -25,34 +30,27 @@ const analyzeRouter = new Hono<{ Bindings: Env }>()
  * @throws {400} テキストが空または不正な場合
  * @throws {500} 分析処理でエラーが発生した場合
  */
-analyzeRouter.post('/analyze', async (c) => {
+analyzeRouter.post('/analyze', vValidator('json', analysisRequestSchema), async (c) => {
   try {
-    // リクエストボディからテキストを取得
-    const { text } = await c.req.json()
-
-    // バリデーション：テキストが存在し、文字列型であることを確認
-    if (!text || typeof text !== 'string') {
-      return c.json({ error: 'テキストが必要です' }, 400)
-    }
+    // vValidatorで検証済みのデータを取得
+    const { text } = c.req.valid('json')
 
     // Gemini APIを使用して投稿文をメディアリテラシーの観点から分析
     const analysis = await analyzePost(text, c.env.GOOGLE_API_KEY)
 
     // 成功レスポンスを返す
-    return c.json({
-      success: true,
-      analysis,
-      timestamp: new Date().toISOString(), // ISO 8601形式の時刻
-    })
+    return c.json(createSuccessResponse(analysis))
   } catch (error) {
-    // エラーレスポンスを返す
-    return c.json(
-      {
-        error: '分析に失敗しました',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      500 // Internal Server Error
-    )
+    // カスタムエラーの場合は詳細なエラー情報を返す
+    if (error instanceof AppError) {
+      c.status(error.statusCode)
+      return c.json(createErrorResponse(error.userMessage, error.errorCode))
+    }
+
+    // 予期しないエラーの場合
+    console.error('[/analyze] Unexpected error:', error)
+    c.status(500)
+    return c.json(createErrorResponse(ERROR_MESSAGES.UNEXPECTED_ERROR, 'INTERNAL_ERROR'))
   }
 })
 

@@ -1,6 +1,11 @@
+import { vValidator } from '@hono/valibot-validator'
 import { Hono } from 'hono'
+import { ERROR_MESSAGES } from '../constants'
 import { analyzeApology } from '../services/analyzeApology'
+import { AppError } from '../services/errors'
 import type { Env } from '../types/env'
+import { createErrorResponse, createSuccessResponse } from '../types/responses'
+import { analysisRequestSchema } from '../validators/validation-schemas'
 
 /**
  * 謝罪文分析用のルーター
@@ -28,35 +33,28 @@ const apologyRouter = new Hono<{ Bindings: Env }>()
  * @throws {400} テキストが空または不正な場合
  * @throws {500} 分析処理でエラーが発生した場合
  */
-apologyRouter.post('/analyze-apology', async (c) => {
+apologyRouter.post('/analyze-apology', vValidator('json', analysisRequestSchema), async (c) => {
   try {
-    // リクエストボディから謝罪文を取得
-    const { text } = await c.req.json()
-
-    // バリデーション：謝罪文が存在し、文字列型であることを確認
-    if (!text || typeof text !== 'string') {
-      return c.json({ error: 'テキストが必要です' }, 400)
-    }
+    // vValidatorで検証済みのデータを取得
+    const { text } = c.req.valid('json')
 
     // Gemini APIを使用して謝罪文を分析
     // 謝罪文専用の分析関数を使用して、適切性を評価します
     const analysis = await analyzeApology(text, c.env.GOOGLE_API_KEY)
 
     // 成功レスポンスを返す
-    return c.json({
-      success: true,
-      analysis,
-      timestamp: new Date().toISOString(), // ISO 8601形式の時刻
-    })
+    return c.json(createSuccessResponse(analysis))
   } catch (error) {
-    // エラーレスポンスを返す
-    return c.json(
-      {
-        error: '謝罪文分析に失敗しました',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      500 // Internal Server Error
-    )
+    // カスタムエラーの場合は詳細なエラー情報を返す
+    if (error instanceof AppError) {
+      c.status(error.statusCode)
+      return c.json(createErrorResponse(error.userMessage, error.errorCode))
+    }
+
+    // 予期しないエラーの場合
+    console.error('[/analyze-apology] Unexpected error:', error)
+    c.status(500)
+    return c.json(createErrorResponse(ERROR_MESSAGES.UNEXPECTED_ERROR, 'INTERNAL_ERROR'))
   }
 })
 

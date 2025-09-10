@@ -5,6 +5,8 @@
  */
 
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai'
+import { ANALYSIS_CONFIG } from '../constants'
+import { classifyGeminiError } from './errors'
 import type { AnalysisResult } from './types'
 
 /**
@@ -12,15 +14,10 @@ import type { AnalysisResult } from './types'
  *
  * @param prompt - 分析用のプロンプト
  * @param apiKey - Google Gemini APIキー
- * @param errorMessage - エラー時のメッセージ
  * @returns 分析結果（説明文とリスクレベル）
- * @throws Error - Gemini API呼び出しに失敗した場合
+ * @throws AppError - Gemini API呼び出しに失敗した場合
  */
-export async function callGeminiAPI(
-  prompt: string,
-  apiKey: string,
-  errorMessage: string = 'Failed to analyze'
-): Promise<AnalysisResult> {
+export async function callGeminiAPI(prompt: string, apiKey: string): Promise<AnalysisResult> {
   /**
    * Google Generative AIクライアントの初期化
    */
@@ -32,7 +29,7 @@ export async function callGeminiAPI(
    * - generationConfig: 出力形式の設定
    */
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
+    model: ANALYSIS_CONFIG.GEMINI_MODEL,
     generationConfig: {
       // JSON形式でレスポンスを取得
       responseMimeType: 'application/json',
@@ -71,9 +68,16 @@ export async function callGeminiAPI(
     const responseText = response.text()
 
     // JSON文字列をパースして型付きオブジェクトとして返す
-    return JSON.parse(responseText) as AnalysisResult
-  } catch (_error) {
-    // エラーを上位に伝播
-    throw new Error(errorMessage)
+    const parsedResult = JSON.parse(responseText) as AnalysisResult
+
+    // レスポンスの検証
+    if (!parsedResult.explanation || !parsedResult.riskLevel) {
+      throw new Error('Invalid response format from Gemini API')
+    }
+
+    return parsedResult
+  } catch (error) {
+    // エラーを分類して適切なカスタムエラーを投げる
+    throw classifyGeminiError(error)
   }
 }

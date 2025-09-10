@@ -45,9 +45,9 @@ export async function analyzeApology(text: string, apiKey: string): Promise<Anal
 特に、誠意が感じられない、責任を曖昧にしている、具体性に欠ける場合は厳しく評価してください。
 explanationには、謝罪文として不適切な理由と改善すべき点を具体的に指摘してください。
 注意事項：ここに記載されている内容をそのまま出力しないでください。返答は1文の日本語でお願いします。
-絶対に短く出力してください。50文字以内でお願いします。
+絶対に短く出力してください。3行程度でお願いします。
 `
 
   // 共通関数を使用してGemini APIを呼び出す
-  return callGeminiAPI(prompt, apiKey, 'Failed to analyze apology')
+  return callGeminiAPI(prompt, apiKey)
 }

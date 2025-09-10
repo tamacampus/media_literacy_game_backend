@@ -178,7 +178,7 @@
         <div class="error hidden" id="error"></div>
         
         <div class="api-info">
-            <strong>APIエンドポイント:</strong> http://localhost:8787<br>
+            <strong>APIエンドポイント:</strong> https://media-literacy-game-api.starry-night.dev<br>
             <strong>現在のモード:</strong> <span id="currentMode">SNS投稿分析</span>
         </div>
     </div>
@@ -186,7 +186,7 @@
     <script>
         class MediaLiteracyAnalyzer {
             constructor() {
-                this.apiBase = 'http://localhost:8787';
+                this.apiBase = 'https://media-literacy-game-api.starry-night.dev';
                 this.analysisType = 'post'; // 'post' or 'apology'
                 this.initializeElements();
                 this.setupEventListeners();

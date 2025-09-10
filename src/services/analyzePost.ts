@@ -43,11 +43,11 @@ export async function analyzePost(text: string, apiKey: string): Promise<Analysi
 リスクレベルは高めに評価してください。
 explanationには、リスクレベルの判断理由と具体的なリスク要因を含めて説明してください。
 注意事項：この文章の内容はユーザーには見えないため、ここに記載されている内容をそのまま出力しないでください。返答は1文の日本語でお願いします。
-絶対に短く出力してください。50文字以内でお願いします。
+絶対に短く出力してください。3行程度でお願いします。
 `
 
   // 共通関数を使用してGemini APIを呼び出す
-  return callGeminiAPI(prompt, apiKey, 'Failed to analyze post')
+  return callGeminiAPI(prompt, apiKey)
 }
 
 /**

@@ -1,13 +1,15 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import type { Env } from './types/env'
-
+import { ERROR_CODES, ERROR_MESSAGES } from './constants'
 // ルーターのインポート
 import analyzeRouter from './routes/analyze'
 import apologyRouter from './routes/apology'
 import healthRouter from './routes/health'
 import mockRouter from './routes/mock'
+import { AppError } from './services/errors'
+import type { Env } from './types/env'
+import { createErrorResponse } from './types/responses'
 
 /**
  * Honoアプリケーションのインスタンスを作成
@@ -49,14 +51,25 @@ app.route('/', mockRouter)
  * 各エンドポイントで処理されなかったエラーをキャッチ
  */
 app.onError((err, c) => {
-  // エラーレスポンスを返す
-  return c.json(
-    {
-      error: 'サーバーエラーが発生しました',
-      details: err.message,
-    },
-    500 // Internal Server Error
-  )
+  // vValidatorのHTTPException（Valibot形式のエラーを含む）
+  if ('getResponse' in err && typeof err.getResponse === 'function') {
+    const response = err.getResponse()
+    if (response.status === 400) {
+      // バリデーションエラーをそのまま返す
+      return response
+    }
+  }
+
+  // カスタムエラーの場合
+  if (err instanceof AppError) {
+    c.status(err.statusCode)
+    return c.json(createErrorResponse(err.userMessage, err.errorCode))
+  }
+
+  // 予期しないエラーの場合
+  console.error('[Global Error Handler]', err)
+  c.status(500)
+  return c.json(createErrorResponse(ERROR_MESSAGES.SERVER_ERROR, ERROR_CODES.SERVER_ERROR))
 })
 
 /**
@@ -64,13 +77,13 @@ app.onError((err, c) => {
  * 定義されていないエンドポイントへのリクエストを処理
  */
 app.notFound((c) => {
-  return c.json(
-    {
-      error: 'エンドポイントが見つかりません',
-      path: c.req.path, // デバッグ用：リクエストされたパスを含める
-    },
-    404
-  )
+  c.status(404)
+  return c.json({
+    error: 'エンドポイントが見つかりません',
+    errorCode: 'NOT_FOUND',
+    path: c.req.path,
+    timestamp: new Date().toISOString(),
+  })
 })
 
 /**
