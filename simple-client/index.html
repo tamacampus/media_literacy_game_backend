@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メディアリテラシー分析ツール</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        .analysis-type-selector {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            border: 2px solid #4CAF50;
+            background-color: white;
+            color: #4CAF50;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-button:hover {
+            background-color: #45a049;
+            color: white;
+        }
+        .input-section {
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button.analyze-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        button.analyze-button:hover {
+            background-color: #45a049;
+        }
+        button.analyze-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .score-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .score-very-low { background-color: #d4edda; color: #155724; }
+        .score-low { background-color: #d4edda; color: #155724; }
+        .score-medium { background-color: #fff3cd; color: #856404; }
+        .score-high { background-color: #f8d7da; color: #721c24; }
+        .score-very-high { background-color: #f8d7da; color: #721c24; }
+        .explanation {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .api-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1565C0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 メディアリテラシー分析ツール</h1>
+        
+        <div class="analysis-type-selector">
+            <div class="tab-buttons">
+                <button class="tab-button active" id="postTab">SNS投稿分析</button>
+                <button class="tab-button" id="apologyTab">謝罪文分析</button>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <label for="textInput" id="inputLabel">分析したいSNS投稿を入力してください：</label>
+            <textarea id="textInput" placeholder="ここに文章を入力してください..."></textarea>
+        </div>
+        
+        <button class="analyze-button" id="analyzeButton">分析する</button>
+        
+        <div class="loading" id="loading">
+            <p>分析中... しばらくお待ちください</p>
+        </div>
+        
+        <div class="results hidden" id="results">
+            <div class="score-display" id="scoreDisplay"></div>
+            <div class="explanation" id="explanation"></div>
+        </div>
+        
+        <div class="error hidden" id="error"></div>
+        
+        <div class="api-info">
+            <strong>APIエンドポイント:</strong> http://localhost:8787<br>
+            <strong>現在のモード:</strong> <span id="currentMode">SNS投稿分析</span>
+        </div>
+    </div>
+
+    <script>
+        class MediaLiteracyAnalyzer {
+            constructor() {
+                this.apiBase = 'http://localhost:8787';
+                this.analysisType = 'post'; // 'post' or 'apology'
+                this.initializeElements();
+                this.setupEventListeners();
+            }
+
+            initializeElements() {
+                this.textInput = document.getElementById('textInput');
+                this.analyzeButton = document.getElementById('analyzeButton');
+                this.loading = document.getElementById('loading');
+                this.results = document.getElementById('results');
+                this.scoreDisplay = document.getElementById('scoreDisplay');
+                this.explanation = document.getElementById('explanation');
+                this.error = document.getElementById('error');
+                this.postTab = document.getElementById('postTab');
+                this.apologyTab = document.getElementById('apologyTab');
+                this.inputLabel = document.getElementById('inputLabel');
+                this.currentMode = document.getElementById('currentMode');
+            }
+
+            setupEventListeners() {
+                this.analyzeButton.addEventListener('click', () => this.analyze());
+                
+                this.postTab.addEventListener('click', () => {
+                    this.setAnalysisType('post');
+                });
+                
+                this.apologyTab.addEventListener('click', () => {
+                    this.setAnalysisType('apology');
+                });
+                
+                // Enterキーで分析実行
+                this.textInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        this.analyze();
+                    }
+                });
+            }
+
+            setAnalysisType(type) {
+                this.analysisType = type;
+                
+                if (type === 'post') {
+                    this.postTab.classList.add('active');
+                    this.apologyTab.classList.remove('active');
+                    this.inputLabel.textContent = '分析したいSNS投稿を入力してください：';
+                    this.currentMode.textContent = 'SNS投稿分析';
+                    this.textInput.placeholder = 'ここにSNS投稿を入力してください...';
+                } else {
+                    this.apologyTab.classList.add('active');
+                    this.postTab.classList.remove('active');
+                    this.inputLabel.textContent = '分析したい謝罪文を入力してください：';
+                    this.currentMode.textContent = '謝罪文分析';
+                    this.textInput.placeholder = 'ここに謝罪文を入力してください...';
+                }
+                
+                // 結果をクリア
+                this.hideResults();
+                this.hideError();
+            }
+
+            async analyze() {
+                const text = this.textInput.value.trim();
+                if (!text) {
+                    this.showError('分析する文章を入力してください。');
+                    return;
+                }
+
+                this.showLoading();
+                this.hideResults();
+                this.hideError();
+
+                try {
+                    const endpoint = this.analysisType === 'post' ? '/analyze' : '/analyze-apology';
+                    const response = await fetch(`${this.apiBase}${endpoint}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'エラーが発生しました' }));
+                        throw new Error(errorData.error || `HTTPエラー: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('APIレスポンス:', data);
+                    this.displayResults(data);
+                } catch (error) {
+                    this.showError('分析に失敗しました: ' + error.message);
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            displayResults(data) {
+                const analysis = data.analysis;
+                // リスクレベル表示
+                const riskText = this.getRiskLevelText(analysis.riskLevel);
+                this.scoreDisplay.textContent = `リスクレベル: ${riskText}`;
+                this.scoreDisplay.className = `score-display score-${analysis.riskLevel.replace(' ', '-')}`;
+
+                // 説明
+                this.explanation.innerHTML = `
+                    <h4>分析結果</h4>
+                    <p>${analysis.explanation}</p>
+                `;
+
+                this.showResults();
+            }
+
+            getRiskLevelText(level) {
+                const levelMap = {
+                    'very low': '非常に低い',
+                    'low': '低い',
+                    'medium': '中程度',
+                    'high': '高い',
+                    'very high': '非常に高い'
+                };
+                return levelMap[level] || level;
+            }
+
+            showLoading() {
+                this.loading.style.display = 'block';
+                this.analyzeButton.disabled = true;
+            }
+
+            hideLoading() {
+                this.loading.style.display = 'none';
+                this.analyzeButton.disabled = false;
+            }
+
+            showResults() {
+                this.results.classList.remove('hidden');
+            }
+
+            hideResults() {
+                this.results.classList.add('hidden');
+            }
+
+            showError(message) {
+                this.error.textContent = message;
+                this.error.classList.remove('hidden');
+            }
+
+            hideError() {
+                this.error.classList.add('hidden');
+            }
+        }
+
+        // アプリケーション初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            new MediaLiteracyAnalyzer();
+        });
+    </script>
+</body>
+</html>
