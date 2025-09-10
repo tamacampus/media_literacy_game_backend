@@ -1,0 +1,20 @@
+{
+  "name": "media-literacy-game-backend",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "format": "biome check --write --unsafe src",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "hono": "^4.9.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.4.0"
+  }
+}

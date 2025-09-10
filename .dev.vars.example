@@ -1,0 +1,5 @@
+# Cloudflare Workers環境変数設定例
+# このファイルを.dev.varsとしてコピーして使用してください
+
+# Google Gemini APIキー
+GOOGLE_API_KEY=your_google_api_key_here
