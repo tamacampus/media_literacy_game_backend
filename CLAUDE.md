@@ -39,7 +39,7 @@ src/
 ├── index.ts                  # Main entry point, middleware setup, error handling
 ├── routes/
 │   ├── analyze.ts           # POST /analyze - SNS post analysis endpoint
-│   ├── apology.ts           # POST /analyze-apology - Apology text analysis endpoint
+│   ├── apology.ts           # POST /apology - Apology text analysis endpoint
 │   ├── health.ts            # GET / - Health check endpoint
 │   └── mock.ts              # POST /mock - Mock endpoint for testing
 ├── services/
@@ -90,7 +90,7 @@ Request:  { "text": "string" }
 Response: { "explanation": "string", "riskLevel": "very low|low|medium|high|very high" }
 ```
 
-### POST `/analyze-apology`
+### POST `/apology`
 ```json
 Request:  { "text": "string" }
 Response: { "explanation": "string", "riskLevel": "very low|low|medium|high|very high" }

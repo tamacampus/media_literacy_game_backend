@@ -142,7 +142,7 @@ bun run cf-typegen
 }
 ```
 
-### POST `/analyze-apology`
+### POST `/apology`
 謝罪文の適切性を分析
 
 **リクエスト:**
@@ -177,7 +177,7 @@ curl -X POST http://localhost:8787/analyze \
   -d '{"text": "このニュースは100%真実です！"}'
 
 # 謝罪文分析
-curl -X POST http://localhost:8787/analyze-apology \
+curl -X POST http://localhost:8787/apology \
   -H "Content-Type: application/json" \
   -d '{"text": "申し訳ございませんでした。"}'
 ```

@@ -14,7 +14,7 @@ import { analysisRequestSchema } from '../validators/validation-schemas'
 const apologyRouter = new Hono<{ Bindings: Env }>()
 
 /**
- * POST /analyze-apology
+ * POST /apology
  * 謝罪文をメディアリテラシーの観点から分析するエンドポイント
  *
  * このエンドポイントは、企業や個人の謝罪文が
@@ -33,7 +33,7 @@ const apologyRouter = new Hono<{ Bindings: Env }>()
  * @throws {400} テキストが空または不正な場合
  * @throws {500} 分析処理でエラーが発生した場合
  */
-apologyRouter.post('/analyze-apology', vValidator('json', analysisRequestSchema), async (c) => {
+apologyRouter.post('/apology', vValidator('json', analysisRequestSchema), async (c) => {
   try {
     // vValidatorで検証済みのデータを取得
     const { text } = c.req.valid('json')
@@ -52,7 +52,7 @@ apologyRouter.post('/analyze-apology', vValidator('json', analysisRequestSchema)
     }
 
     // 予期しないエラーの場合
-    console.error('[/analyze-apology] Unexpected error:', error)
+    console.error('[/apology] Unexpected error:', error)
     c.status(500)
     return c.json(createErrorResponse(ERROR_MESSAGES.UNEXPECTED_ERROR, 'INTERNAL_ERROR'))
   }

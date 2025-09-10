@@ -6,6 +6,7 @@
 
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai'
 import { ANALYSIS_CONFIG } from '../constants'
+import { extractAndParseJSON } from '../utils/json-parser'
 import { classifyGeminiError } from './errors'
 import type { AnalysisResult } from './types'
 
@@ -33,7 +34,6 @@ export async function callGeminiAPI(prompt: string, apiKey: string): Promise<Ana
     generationConfig: {
       // JSON形式でレスポンスを取得
       responseMimeType: 'application/json',
-
       // レスポンスのスキーマ定義（型安全性を確保）
       responseSchema: {
         type: SchemaType.OBJECT,
@@ -68,7 +68,7 @@ export async function callGeminiAPI(prompt: string, apiKey: string): Promise<Ana
     const responseText = response.text()
 
     // JSON文字列をパースして型付きオブジェクトとして返す
-    const parsedResult = JSON.parse(responseText) as AnalysisResult
+    const parsedResult = extractAndParseJSON(responseText) as AnalysisResult
 
     // レスポンスの検証
     if (!parsedResult.explanation || !parsedResult.riskLevel) {
