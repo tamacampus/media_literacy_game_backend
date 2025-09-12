@@ -19,6 +19,13 @@ export const analysisRequestSchema = v.object({
     v.maxLength(ANALYSIS_CONFIG.MAX_TEXT_LENGTH, ERROR_MESSAGES.TEXT_TOO_LONG),
     v.transform((val) => val.trim()) // 前後の空白を自動除去
   ),
+  context: v.optional(
+    v.pipe(
+      v.string('文脈は文字列である必要があります'),
+      v.maxLength(1000, '文脈は1000文字以内で入力してください'),
+      v.transform((val) => val.trim()) // 前後の空白を自動除去
+    )
+  ),
 })
 
 /**

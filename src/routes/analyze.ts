@@ -33,10 +33,10 @@ const analyzeRouter = new Hono<{ Bindings: Env }>()
 analyzeRouter.post('/analyze', vValidator('json', analysisRequestSchema), async (c) => {
   try {
     // vValidatorで検証済みのデータを取得
-    const { text } = c.req.valid('json')
+    const { text, context } = c.req.valid('json')
 
     // Gemini APIを使用して投稿文をメディアリテラシーの観点から分析
-    const analysis = await analyzePost(text, c.env.GOOGLE_API_KEY)
+    const analysis = await analyzePost(text, c.env.GOOGLE_API_KEY, context)
 
     // 成功レスポンスを返す
     return c.json(createSuccessResponse(analysis))

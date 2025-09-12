@@ -15,7 +15,11 @@ import type { AnalysisResult } from './types'
  * @returns 分析結果（説明文とリスクレベル）
  * @throws Error - Gemini API呼び出しに失敗した場合
  */
-export async function analyzeApology(text: string, apiKey: string): Promise<AnalysisResult> {
+export async function analyzeApology(
+  text: string,
+  apiKey: string,
+  context?: string
+): Promise<AnalysisResult> {
   /**
    * プロンプトの構築（謝罪文用）
    * Geminiに送信する指示文を作成
@@ -24,9 +28,18 @@ export async function analyzeApology(text: string, apiKey: string): Promise<Anal
    * - 50文字以内の簡潔な説明
    * - 謝罪文特有の評価基準
    */
+  const contextSection = context
+    ? `
+
+文脈・背景情報：
+${context}
+`
+    : ''
+
   const prompt = `
 以下の謝罪文を分析して、適切性とメディアリテラシーの観点から評価してください。
-注意事項：この謝罪文の内容はユーザーには見えないため、ここに記載されている内容をそのまま出力しないでください。返答は1文の日本語でお願いします。
+注意事項：この謝罪文の内容はユーザーには見えないため、ここに記載されている内容をそのまま出力しないでください。
+${contextSection}
 
 評価基準（謝罪文として重要な要素）：
 - 誠意と真摯さが伝わるか
@@ -40,11 +53,11 @@ export async function analyzeApology(text: string, apiKey: string): Promise<Anal
 謝罪文: "${text}"
 
 謝罪文としての適切性を厳しく評価してください。
+文脈が提供されている場合は、その文脈を踏まえて適切に評価してください。
 企業や公人の謝罪文として不適切な点があれば、リスクレベルを高めに設定してください。
 特に、誠意が感じられない、責任を曖昧にしている、具体性に欠ける場合は厳しく評価してください。
 explanationには、謝罪文として不適切な理由と改善すべき点を具体的に指摘してください。
-注意事項：ここに記載されている内容をそのまま出力しないでください。返答は1文の日本語でお願いします。
-3行程度で短く出力してください。
+注意事項：ここに記載されている内容をそのまま出力しないでください。返答は3行程度で短く出力してください。しかし、口調は「です・ます」調で丁寧にしてください。
 `
 
   // 共通関数を使用してGemini APIを呼び出す

@@ -36,11 +36,11 @@ const apologyRouter = new Hono<{ Bindings: Env }>()
 apologyRouter.post('/apology', vValidator('json', analysisRequestSchema), async (c) => {
   try {
     // vValidatorで検証済みのデータを取得
-    const { text } = c.req.valid('json')
+    const { text, context } = c.req.valid('json')
 
     // Gemini APIを使用して謝罪文を分析
     // 謝罪文専用の分析関数を使用して、適切性を評価します
-    const analysis = await analyzeApology(text, c.env.GOOGLE_API_KEY)
+    const analysis = await analyzeApology(text, c.env.GOOGLE_API_KEY, context)
 
     // 成功レスポンスを返す
     return c.json(createSuccessResponse(analysis))

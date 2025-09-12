@@ -86,13 +86,19 @@ Returns health status
 
 ### POST `/analyze`
 ```json
-Request:  { "text": "string" }
+Request:  { 
+  "text": "string",
+  "context": "string (optional, max 1000 chars)"
+}
 Response: { "explanation": "string", "riskLevel": "very low|low|medium|high|very high" }
 ```
 
 ### POST `/apology`
 ```json
-Request:  { "text": "string" }
+Request:  { 
+  "text": "string",
+  "context": "string (optional, max 1000 chars)"
+}
 Response: { "explanation": "string", "riskLevel": "very low|low|medium|high|very high" }
 ```
 
@@ -124,6 +130,13 @@ wrangler secret put GOOGLE_API_KEY
 - Language level: Elementary school Japanese
 - Evaluation style: Intentionally critical/harsh
 - Risk levels: 5-tier system (very low to very high)
+
+### Context Feature
+- Both `/analyze` and `/apology` endpoints accept optional `context` parameter
+- Context provides background information about the poster or SNS environment
+- Maximum 1000 characters for context
+- AI considers context when evaluating risk levels
+- Helps reduce "unknown context, therefore high risk" type responses
 
 ### Error Handling Pattern
 - All endpoints use try-catch blocks
@@ -185,6 +198,16 @@ curl http://localhost:8787/
 curl -X POST http://localhost:8787/analyze \
   -H "Content-Type: application/json" \
   -d '{"text": "test"}'
+
+# Analyze post with context
+curl -X POST http://localhost:8787/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"text": "test", "context": "投稿者は大学生で、SNSでの影響力は小さい"}'
+
+# Analyze apology with context
+curl -X POST http://localhost:8787/apology \
+  -H "Content-Type: application/json" \
+  -d '{"text": "申し訳ございません", "context": "大手企業のCEOによる謝罪文"}'
 ```
 
 ## Common Tasks
