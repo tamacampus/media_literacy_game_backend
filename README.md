@@ -4,7 +4,7 @@
 
 ## 🎯 プロジェクト概要
 
-このプロジェクトは、メディアリテラシー教育を目的としたWebアプリケーションのバックエンドAPIです。ユーザーが入力したテキストをAIが分析し、情報の信頼性、偏見、プライバシーへの配慮などの観点から評価を行います。
+このプロジェクトは、メディアリテラシー教育を目的としたティラノビルダー製ゲームのバックエンドAPIです。ユーザーが入力したテキストをAIが分析し、情報の信頼性、偏見、プライバシーへの配慮などの観点から評価を行います。
 
 ### 主な機能
 
@@ -182,7 +182,7 @@ curl -X POST http://localhost:8787/apology \
   -d '{"text": "申し訳ございませんでした。"}'
 ```
 
-### Webクライアントでのテスト
+### 簡易Webクライアントでのテスト
 
 `simple-client/index.html`をブラウザで開いて、GUIでAPIをテストできます。
 
@@ -196,19 +196,17 @@ curl -X POST http://localhost:8787/apology \
 2. **サービス層** (`services/`): ビジネスロジックとAI連携
 3. **共通クライアント層**: 外部API通信の抽象化
 
-### 重要な設計判断
-
-1. **構造化出力の使用**: Gemini APIのJSON Schema機能により型安全性を確保
-2. **共通クライアントパターン**: コード重複を避け、保守性を向上
-3. **エラーメッセージの日本語化**: ユーザーフレンドリーなエラー表示
-
 ## 🚀 本番環境へのデプロイ
 
 ### Cloudflare Workersへのデプロイ
+[wrangler.jsonc](https://github.com/tamacampus/media_literacy_game_backend/blob/main/wrangler.jsonc)でカスタムドメインが設定されているため、私以外の環境ではデプロイに失敗します。設定を削除するか、ご自身のドメインに置き換えてください。
 
 ```bash
+# wranglerへのログイン
+bunx wrangler login
+
 # 環境変数をWrangler CLIで設定
-wrangler secret put GOOGLE_API_KEY
+bunx wrangler secret put GOOGLE_API_KEY
 
 # デプロイ実行
 bun run deploy
