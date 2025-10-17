@@ -20,7 +20,7 @@ export const ANALYSIS_CONFIG = {
   MAX_TEXT_LENGTH: 5000,
   MIN_TEXT_LENGTH: 1,
   MAX_EXPLANATION_LENGTH: 50,
-  GEMINI_MODEL: 'gemini-2.5-flash-lite',
+  GEMINI_MODEL: 'gemini-flash-latest',
 } as const
 
 /**
