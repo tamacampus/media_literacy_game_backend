@@ -163,7 +163,12 @@
             <label for="textInput" id="inputLabel">分析したいSNS投稿を入力してください：</label>
             <textarea id="textInput" placeholder="ここに文章を入力してください..."></textarea>
         </div>
-        
+
+        <div class="input-section">
+            <label for="contextInput">文脈情報（任意、最大1000文字）：</label>
+            <textarea id="contextInput" placeholder="投稿者の背景や状況などを入力してください（例：投稿者は大学生で、SNSでの影響力は小さい）" style="height: 100px;"></textarea>
+        </div>
+
         <button class="analyze-button" id="analyzeButton">分析する</button>
         
         <div class="loading" id="loading">
@@ -194,6 +199,7 @@
 
             initializeElements() {
                 this.textInput = document.getElementById('textInput');
+                this.contextInput = document.getElementById('contextInput');
                 this.analyzeButton = document.getElementById('analyzeButton');
                 this.loading = document.getElementById('loading');
                 this.results = document.getElementById('results');
@@ -254,18 +260,29 @@
                     return;
                 }
 
+                const context = this.contextInput.value.trim();
+                if (context.length > 1000) {
+                    this.showError('文脈情報は1000文字以内で入力してください。');
+                    return;
+                }
+
                 this.showLoading();
                 this.hideResults();
                 this.hideError();
 
                 try {
                     const endpoint = this.analysisType === 'post' ? '/analyze' : '/apology';
+                    const requestBody = { text };
+                    if (context) {
+                        requestBody.context = context;
+                    }
+
                     const response = await fetch(`${this.apiBase}${endpoint}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ text })
+                        body: JSON.stringify(requestBody)
                     });
 
                     if (!response.ok) {
