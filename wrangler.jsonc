@@ -1,62 +1,62 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "media-literacy-game-backend",
-  "main": "src/index.ts",
-  "compatibility_date": "2025-09-10",
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // ローカル開発環境用のD1データベース（bun run dev で使用）
-  // 注意: bun run dev はデフォルトでローカルのSQLiteを使用します（.wrangler/state に保存）
-  // リモートDBへの接続はせず、課金は一切発生しません
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "media-literacy-db",
-      "database_id": "local-only-no-remote-required",
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "media-literacy-game-backend",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-09-10",
+	// "compatibility_flags": [
+	//   "nodejs_compat"
+	// ],
+	// "vars": {
+	//   "MY_VAR": "my-variable"
+	// },
+	// "kv_namespaces": [
+	//   {
+	//     "binding": "MY_KV_NAMESPACE",
+	//     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	//   }
+	// ],
+	// "r2_buckets": [
+	//   {
+	//     "binding": "MY_BUCKET",
+	//     "bucket_name": "my-bucket"
+	//   }
+	// ],
+	// ローカル開発環境用のD1データベース（bun run dev で使用）
+	// 注意: bun run dev はデフォルトでローカルのSQLiteを使用します（.wrangler/state に保存）
+	// リモートDBへの接続はせず、課金は一切発生しません
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "media-literacy-db",
+			"database_id": "39099a6a-7799-4569-8159-f54a09297738",
       "migrations_dir": "migrations"
-    }
-  ],
-  // "ai": {
-  //   "binding": "AI"
-  // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // },
-  // 本番環境用の設定（bun run deploy で使用）
-  "env": {
-    "production": {
-      "name": "media-literacy-game-backend-production",
-      "routes": [
-        {
-          "pattern": "media-literacy-game-api.starry-night.dev",
-          "custom_domain": true
-        }
-      ],
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "media-literacy-db",
-          "database_id": "TODO_ADD_PRODUCTION_DATABASE_ID",
-          "migrations_dir": "migrations"
-        }
-      ]
-    }
-  }
+		}
+	],
+	// "ai": {
+	//   "binding": "AI"
+	// },
+	// "observability": {
+	//   "enabled": true,
+	//   "head_sampling_rate": 1
+	// },
+	// 本番環境用の設定（bun run deploy で使用）
+	"env": {
+		"production": {
+			"name": "media-literacy-game-backend-production",
+			"routes": [
+				{
+					"pattern": "media-literacy-game-api.starry-night.dev",
+					"custom_domain": true
+				}
+			],
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "media-literacy-db",
+					"database_id": "39099a6a-7799-4569-8159-f54a09297738",
+					"migrations_dir": "migrations"
+				}
+			]
+		}
+	}
 }
