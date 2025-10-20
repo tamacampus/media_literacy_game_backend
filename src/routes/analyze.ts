@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { ERROR_MESSAGES } from '../constants'
 import { analyzePost } from '../services/analyzePost'
 import { AppError } from '../services/errors'
+import { saveAnalysisResult } from '../services/saveAnalysisResult'
 import type { Env } from '../types/env'
 import { createErrorResponse, createSuccessResponse } from '../types/responses'
 import { analysisRequestSchema } from '../validators/validation-schemas'
@@ -33,10 +34,20 @@ const analyzeRouter = new Hono<{ Bindings: Env }>()
 analyzeRouter.post('/analyze', vValidator('json', analysisRequestSchema), async (c) => {
   try {
     // vValidatorで検証済みのデータを取得
-    const { text, context } = c.req.valid('json')
+    const { text, context, shouldSave } = c.req.valid('json')
 
     // Gemini APIを使用して投稿文をメディアリテラシーの観点から分析
     const analysis = await analyzePost(text, c.env.GOOGLE_API_KEY, context)
+
+    // shouldSaveがtrueの場合、結果をD1データベースに保存
+    if (shouldSave) {
+      try {
+        await saveAnalysisResult(c.env.DB, 'analyze', text, context, analysis)
+      } catch (dbError) {
+        // DB保存エラーはログに記録するが、ユーザーには分析結果を返す
+        console.error('[/analyze] Database save error:', dbError)
+      }
+    }
 
     // 成功レスポンスを返す
     return c.json(createSuccessResponse(analysis))

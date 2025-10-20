@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { ERROR_MESSAGES } from '../constants'
 import { analyzeApology } from '../services/analyzeApology'
 import { AppError } from '../services/errors'
+import { saveAnalysisResult } from '../services/saveAnalysisResult'
 import type { Env } from '../types/env'
 import { createErrorResponse, createSuccessResponse } from '../types/responses'
 import { analysisRequestSchema } from '../validators/validation-schemas'
@@ -36,11 +37,21 @@ const apologyRouter = new Hono<{ Bindings: Env }>()
 apologyRouter.post('/apology', vValidator('json', analysisRequestSchema), async (c) => {
   try {
     // vValidatorで検証済みのデータを取得
-    const { text, context } = c.req.valid('json')
+    const { text, context, shouldSave } = c.req.valid('json')
 
     // Gemini APIを使用して謝罪文を分析
     // 謝罪文専用の分析関数を使用して、適切性を評価します
     const analysis = await analyzeApology(text, c.env.GOOGLE_API_KEY, context)
+
+    // shouldSaveがtrueの場合、結果をD1データベースに保存
+    if (shouldSave) {
+      try {
+        await saveAnalysisResult(c.env.DB, 'apology', text, context, analysis)
+      } catch (dbError) {
+        // DB保存エラーはログに記録するが、ユーザーには分析結果を返す
+        console.error('[/apology] Database save error:', dbError)
+      }
+    }
 
     // 成功レスポンスを返す
     return c.json(createSuccessResponse(analysis))

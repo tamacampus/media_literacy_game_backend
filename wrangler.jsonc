@@ -3,12 +3,6 @@
   "name": "media-literacy-game-backend",
   "main": "src/index.ts",
   "compatibility_date": "2025-09-10",
-  "routes": [
-      {
-        "pattern": "media-literacy-game-api.starry-night.dev",
-        "custom_domain": true
-      }
-  ]
   // "compatibility_flags": [
   //   "nodejs_compat"
   // ],
@@ -27,18 +21,42 @@
   //     "bucket_name": "my-bucket"
   //   }
   // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
+  // ローカル開発環境用のD1データベース（bun run dev で使用）
+  // 注意: bun run dev はデフォルトでローカルのSQLiteを使用します（.wrangler/state に保存）
+  // リモートDBへの接続はせず、課金は一切発生しません
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "media-literacy-db",
+      "database_id": "local-only-no-remote-required",
+      "migrations_dir": "migrations"
+    }
+  ],
   // "ai": {
   //   "binding": "AI"
   // },
   // "observability": {
   //   "enabled": true,
   //   "head_sampling_rate": 1
-  // }
+  // },
+  // 本番環境用の設定（bun run deploy で使用）
+  "env": {
+    "production": {
+      "name": "media-literacy-game-backend-production",
+      "routes": [
+        {
+          "pattern": "media-literacy-game-api.starry-night.dev",
+          "custom_domain": true
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "media-literacy-db",
+          "database_id": "TODO_ADD_PRODUCTION_DATABASE_ID",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  }
 }

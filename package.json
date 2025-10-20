@@ -3,19 +3,24 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 8787",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy --minify --env production",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "format": "biome check --write --unsafe src",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply media-literacy-db --local",
+    "db:migrate:production": "wrangler d1 migrations apply media-literacy-db --remote --env production"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@hono/valibot-validator": "^0.5.3",
+    "drizzle-orm": "^0.44.6",
     "hono": "^4.9.6",
     "valibot": "^1.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
+    "drizzle-kit": "^0.31.5",
     "typescript": "^5.9.2",
     "wrangler": "^4.4.0"
   }
