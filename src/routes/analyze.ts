@@ -34,13 +34,13 @@ const analyzeRouter = new Hono<{ Bindings: Env }>()
 analyzeRouter.post('/analyze', vValidator('json', analysisRequestSchema), async (c) => {
   try {
     // vValidatorで検証済みのデータを取得
-    const { text, context, shouldSave } = c.req.valid('json')
+    const { text, context, agreedToResearch } = c.req.valid('json')
 
     // Gemini APIを使用して投稿文をメディアリテラシーの観点から分析
     const analysis = await analyzePost(text, c.env.GOOGLE_API_KEY, context)
 
-    // shouldSaveがtrueの場合、結果をD1データベースに保存
-    if (shouldSave) {
+    // 研究に同意した場合、結果をD1データベースに保存
+    if (agreedToResearch) {
       try {
         await saveAnalysisResult(c.env.DB, 'analyze', text, context, analysis)
       } catch (dbError) {

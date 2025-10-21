@@ -26,9 +26,9 @@ export const analysisRequestSchema = v.object({
       v.transform((val) => val.trim()) // 前後の空白を自動除去
     )
   ),
-  shouldSave: v.optional(
-    v.boolean('shouldSaveはブール値である必要があります'),
-    false // デフォルト値はfalse（保存しない）
+  agreedToResearch: v.optional(
+    v.boolean('agreedToResearchはブール値である必要があります'),
+    false // デフォルト値はfalse（研究に同意しない）
   ),
 })
 

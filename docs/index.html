@@ -311,8 +311,8 @@
                     if (context) {
                         requestBody.context = context;
                     }
-                    // チェックボックスの状態をshouldSaveとして送信
-                    requestBody.shouldSave = this.consentCheckbox.checked;
+                    // チェックボックスの状態をagreedToResearchとして送信
+                    requestBody.agreedToResearch = this.consentCheckbox.checked;
 
                     const response = await fetch(`${this.apiBase}${endpoint}`, {
                         method: 'POST',

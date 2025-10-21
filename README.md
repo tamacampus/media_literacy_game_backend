@@ -155,7 +155,7 @@ bun run db:migrate:production
 {
   "text": "今日は最高の天気！みんな外に出よう！",
   "context": "投稿者は大学生で、SNSでの影響力は小さい（任意）",
-  "shouldSave": true  // 任意: trueの場合、分析結果をD1データベースに保存（デフォルト: false）
+  "agreedToResearch": true  // 任意: trueの場合、分析結果をD1データベースに保存（デフォルト: false）
 }
 ```
 
@@ -175,7 +175,7 @@ bun run db:migrate:production
 {
   "text": "この度は多大なるご迷惑をおかけし、深くお詫び申し上げます。",
   "context": "大手企業のCEOによる謝罪文（任意）",
-  "shouldSave": true  // 任意: trueの場合、分析結果をD1データベースに保存（デフォルト: false）
+  "agreedToResearch": true  // 任意: trueの場合、分析結果をD1データベースに保存（デフォルト: false）
 }
 ```
 
@@ -190,7 +190,7 @@ bun run db:migrate:production
 **パラメータ:**
 - `text` (必須): 分析対象のテキスト
 - `context` (任意): 投稿者や状況に関する背景情報（最大1000文字）
-- `shouldSave` (任意): `true`の場合、分析結果をデータベースに保存（デフォルト: `false`）
+- `agreedToResearch` (任意): `true`の場合、分析結果をデータベースに保存（デフォルト: `false`）
 
 ### POST `/mock`
 テスト用モックエンドポイント（固定レスポンス）
@@ -407,7 +407,7 @@ bun run dev  # .wrangler/state にローカルDBが作成される
 # 2. ローカルでテストデータを保存して動作確認
 curl -X POST http://localhost:8787/analyze \
   -H "Content-Type: application/json" \
-  -d '{"text": "テスト投稿", "shouldSave": true}'
+  -d '{"text": "テスト投稿", "agreedToResearch": true}'
 
 # 3. ローカルDBのデータを確認
 bunx wrangler d1 execute media-literacy-db --local \
